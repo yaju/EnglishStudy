@@ -3,11 +3,35 @@
     background-color : black;
 }
 
-span {
-    background-color : white;
+div {
+    word-wrap: normal;
+}
+
+span.wordOn {
+    background-color : #424242;
+    border:2px solid #323232;
     border-radius: 5px;
-    margin : 2px;
+    margin : 1px;
     padding : 10px;
+    color: white;
+}
+
+span.wordOff {
+    background-color : #424242;
+    border:2px solid #323232;
+    border-radius: 5px;
+    margin : 1px;
+    padding : 10px;
+    color: #424242;
+}
+
+span.answer {
+    background-color : white;
+    border:2px solid #6995B2;
+    border-radius: 5px;
+    margin : 1px;
+    padding : 10px;
+    color: black;
 }
 
 * {
@@ -20,32 +44,35 @@ span {
 } 
  
 .box {
-    background-color:#fff;
-    border:1px solid #000;
-    border-radius:5px;
+    background-color:#E4F5FD;
+    border:3px solid #6995B2;
+    border-radius:10px;
     position:relative;
+    height:200px;
+    width:320px;
+    padding : 10px;
 }
  
 .box:after {
-    border:10px solid transparent;
-    border-top-color:#000;
+    border:30px solid transparent;
+    border-top-color:#6995B2;
     border-bottom-width:0;
-    bottom:-10px;
+    bottom:-30px;
     content:"";
     display:block;
-    left:30px;
+    left:60px;
     position:absolute;
     width:0;
 }
  
 .box:before {
-    border:10px solid transparent;
-    border-top-color:#fff;
+    border:30px solid transparent;
+    border-top-color:#E4F5FD;
     border-bottom-width:0;
-    bottom:-9px;
+    bottom:-27px;
     content:"";
     display:block;
-    left:30px;
+    left:60px;
     position:absolute;
     width:0;
     z-index:1;
