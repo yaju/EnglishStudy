@@ -7,7 +7,19 @@ div {
     word-wrap: normal;
 }
 
-span.wordOn {
+td.countDown {
+    font-size: 32px;
+    font-weight: bold;    
+    color: white;
+    text-align: center;
+}
+
+td.wordStyle {
+    font-size: 9px;
+    text-align: left;
+}
+
+input.wordOn {
     background-color : #424242;
     border:2px solid #323232;
     border-radius: 5px;
@@ -16,7 +28,7 @@ span.wordOn {
     color: white;
 }
 
-span.wordOff {
+input.wordOff {
     background-color : #424242;
     border:2px solid #323232;
     border-radius: 5px;
@@ -25,13 +37,51 @@ span.wordOff {
     color: #424242;
 }
 
-span.answer {
+input.answer {
     background-color : white;
     border:2px solid #6995B2;
     border-radius: 5px;
     margin : 1px;
     padding : 10px;
     color: black;
+}
+
+input.miss {
+    background-color : orange;
+    border:2px solid #6995B2;
+    border-radius: 5px;
+    margin : 1px;
+    padding : 10px;
+    color: black;
+}
+
+.rum{
+    animation: rumble 0.5s linear infinite;
+    -webkit-animation: rumble 0.5s linear infinite;
+}
+ 
+@keyframes rumble{
+     0% { transform: rotate(0deg);  }
+  12.5% { transform: rotate(4deg);  }
+    25% { transform: rotate(8deg);  }
+  37.5% { transform: rotate(4deg);  }
+    50% { transform: rotate(0deg);  }
+  62.5% { transform: rotate(-4deg); }
+    75% { transform: rotate(-8deg); }
+  87.5% { transform: rotate(-4deg); }
+   100% { transform: rotate(0deg);  }
+}
+
+@-webkit-keyframes rumble {
+     0% { -webkit-transform: rotate(0deg);  }
+  12.5% { -webkit-transform: rotate(4deg);  }
+    25% { -webkit-transform: rotate(8deg);  }
+  37.5% { -webkit-transform: rotate(4deg);  }
+    50% { -webkit-transform: rotate(0deg);  }
+  62.5% { -webkit-transform: rotate(-4deg); }
+    75% { -webkit-transform: rotate(-8deg); }
+  87.5% { -webkit-transform: rotate(-4deg); }
+   100% { -webkit-transform: rotate(0deg);  }
 }
 
 * {
@@ -53,28 +103,22 @@ span.answer {
     padding : 10px;
 }
  
-.box:after {
-    border:30px solid transparent;
-    border-top-color:#6995B2;
-    border-bottom-width:0;
-    bottom:-30px;
-    content:"";
-    display:block;
-    left:60px;
-    position:absolute;
-    width:0;
+.line {
+   border-bottom: 3px solid blue;
+   padding-bottom: 15px; /* 内容と線との間隔量 */
 }
- 
-.box:before {
-    border:30px solid transparent;
-    border-top-color:#E4F5FD;
-    border-bottom-width:0;
-    bottom:-27px;
-    content:"";
-    display:block;
-    left:60px;
-    position:absolute;
-    width:0;
-    z-index:1;
+
+hr {
+   border:solid #000;
+   border-width:1px 0 0 0;
+   height:1px;/* for IE6 */
+   clear:both;/* for IE6 */
+}
+
+.bar {
+	float: left;
+	margin-top: 5px;
+	width: 280px; height: 10px;
+	background-color: #f00;
 }
 
