@@ -7,6 +7,26 @@ div {
     word-wrap: normal;
 }
 
+td.firstStyle {
+    font-size: 32px;
+}
+
+td.secondStyle {
+    font-size: 18px;
+}
+
+td.resultFirst {
+    color : white;
+    font-size: 32px;
+    text-align: center;
+}
+
+td.resultSecond {
+    color : white;
+    font-size: 18px;
+    text-align: center;
+}
+
 td.countDown {
     font-size: 32px;
     font-weight: bold;    
@@ -17,6 +37,11 @@ td.countDown {
 td.wordStyle {
     font-size: 9px;
     text-align: left;
+}
+
+td.scoreStyle {
+    color : white;
+    text-align: center;
 }
 
 input.wordOn {
@@ -84,6 +109,26 @@ input.miss {
    100% { -webkit-transform: rotate(0deg);  }
 }
 
+.pulse {
+	font-size:32px;
+    color : white;
+    text-align: center;
+	animation: pulse 2s linear;
+	-webkit-animation: pulse 1s linear;
+}
+
+@keyframes pulse {
+     0% { transform: scale3d(1, 1, 1);  }
+    50% { transform: scale3d(1, 1, 1);  }
+   100% { transform: scale3d(0.5, 0.5, 0.5);  }
+}
+
+@-webkit-keyframes pulse {
+     0% { -webkit-transform: scale3d(1, 1, 1);  }
+    50% { -webkit-transform: scale3d(0.75, 0.75, 0.75);   }
+   100% { -webkit-transform: scale3d(0.5, 0.5, 0.5);  }
+}
+
 * {
     box-sizing: border-box;
 }
@@ -115,10 +160,17 @@ hr {
    clear:both;/* for IE6 */
 }
 
-.bar {
-	float: left;
-	margin-top: 5px;
-	width: 280px; height: 10px;
-	background-color: #f00;
+.progress-bar{
+     width:244px;
+     height:12px;
+     background:#fff;
+     border:2px solid #34495e;
+     border-radius:6px;
+     margin:0 auto;
 }
-
+.progress-bar span{
+     display:block;
+     height:8px;
+     border-radius:4px;
+     background: #2980b9; /* Old browsers */
+}

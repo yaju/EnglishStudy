@@ -10,14 +10,21 @@
 <body>
     <div class="box" id="content">
         <table border="0" width="300"><tr>
-            <td id="question"></td><tr>
+            <td id="question" class="firstStyle"></td><tr>
             <td id="answer"></td><tr>
             <td id="check"></td><tr>
         </table>        
     </div>
-    <table border="0" width="300"><tr>
-        <td id="wordlist" class="countDown">3</td><tr>
-        <td><div class="bar" id="timer"></div></td><tr>
-    </table>
+    <table border="0" width="300">
+        <tr><td id="wordlist" class="countDown" colspan="2">3</td></tr>
+        <tr><td id="action" colspan="2"></td></tr>
+        <tr><td>
+        <div class="progress-bar">
+            <span id="timer"></span>
+        </div>
+        </td>
+            <td style="color:white">4問</td>
+        </tr>
+</table>
 </body>
 </html>

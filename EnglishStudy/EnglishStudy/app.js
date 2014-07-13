@@ -1,25 +1,114 @@
-﻿var StudyApp = (function () {
+﻿var Scene;
+(function (Scene) {
+    Scene[Scene["None"] = 0] = "None";
+    Scene[Scene["Menu"] = 1] = "Menu";
+    Scene[Scene["Game"] = 2] = "Game";
+    Scene[Scene["Config"] = 3] = "Config";
+})(Scene || (Scene = {}));
+
+var Mode;
+(function (Mode) {
+    Mode[Mode["Ready"] = 0] = "Ready";
+    Mode[Mode["Ready2"] = 1] = "Ready2";
+    Mode[Mode["Start"] = 2] = "Start";
+    Mode[Mode["Next"] = 3] = "Next";
+    Mode[Mode["Next2"] = 4] = "Next2";
+    Mode[Mode["End"] = 5] = "End";
+})(Mode || (Mode = {}));
+
+var StudyApp = (function () {
     // コンストラクタ
     function StudyApp(element) {
         this.speed = 150;
-        this.timeInterval = 280;
+        this.waitInterval = 1;
         this.countDown = 3 + 1;
+        this.timeInterval = StudyApp.TIMER_COUNT_MAX;
         this.obj = {
             col001: { "Question": "これは教会です", "Answer": ["This", "is", "charch"], "Mark": "." },
             col002: { "Question": "あれは机ですか", "Answer": ["Is", "that", "a", "desk"], "Mark": "?" }
         };
-        // 問題表示
-        var questionElm = document.getElementById('question');
-        questionElm.innerText += this.obj["col001"].Question;
+        this.resultList = {
+            rtn1: { "Message": "Bad", "Range": 10, "Score": 0 },
+            rtn2: { "Message": "Good", "Range": 30, "Score": 200 },
+            rtn3: { "Message": "Great", "Range": 60, "Score": 500 },
+            rtn4: { "Message": "Excelent", "Range": 80, "Score": 1000 },
+            rtn5: { "Message": "Fanstastic", "Range": 100, "Score": 1500 }
+        };
+        this.sceneState = 2 /* Game */;
+        this.questionNo = 1;
 
-        // 正答数(ダミーは除く)
-        this.answerCount = this.obj["col001"].Answer.length;
-
-        this.startAction();
+        this.Update(0 /* Ready */);
     }
+    // 更新処理
+    StudyApp.prototype.Update = function (gameState) {
+        var _this = this;
+        var questionElm = document.getElementById('question');
+        var answerElm = document.getElementById('answer');
+        var wordlistElm = document.getElementById('wordlist');
+        var actionElm = document.getElementById('action');
+        var colNo = "col" + this.zeroPadding(3, this.questionNo);
+        this.gameState = gameState;
+
+        switch (this.sceneState) {
+            case 2 /* Game */:
+                switch (gameState) {
+                    case 0 /* Ready */:
+                        // 問題表示
+                        questionElm.className = "firstStyle";
+                        questionElm.innerHTML += "<p>" + this.obj[colNo].Question + "</p>";
+
+                        // 正答数(ダミーは除く)
+                        this.answerCount = this.obj[colNo].Answer.length;
+
+                        // クリア
+                        this.removeChildNode(answerElm);
+                        this.removeChildNode(actionElm);
+
+                        // カウントダウン
+                        this.startAction();
+                        break;
+
+                    case 1 /* Ready2 */:
+                        // ワードリストセット
+                        this.setWordList(colNo);
+
+                        // ウェイト
+                        this.waitAction(2 /* Start */);
+                        break;
+
+                    case 2 /* Start */:
+                        // ゲームスタート
+                        this.timerAction();
+
+                        // 問題表示スタイル変更
+                        questionElm.className = "secondStyle";
+                        questionElm.innerText = this.obj[colNo].Question;
+                        break;
+                    case 3 /* Next */:
+                        wordlistElm.className = "resultSecond";
+
+                        wordlistElm.innerText = "";
+                        actionElm.innerText = "";
+
+                        var input;
+                        input = this.createWordBottun(1, "wordOn", "次の問題");
+                        input.onclick = function (event) {
+                            return _this.onNextClick(_this, event);
+                        };
+                        actionElm.appendChild(input);
+                        break;
+                }
+        }
+
+        return true;
+    };
+
     // ワードクリック処理
     StudyApp.prototype.onWordClick = function (that, e) {
         var _this = this;
+        if (this.gameState != 2 /* Start */)
+            return;
+
         // 答えの位置に配置
         var target = e.target;
         var answerElm = document.getElementById('answer');
@@ -31,18 +120,23 @@
         };
         answerElm.appendChild(input);
 
+        var colNo = "col" + this.zeroPadding(3, this.questionNo);
+
         // 答え合わせ
         if (answerElm.childElementCount == this.answerCount) {
             // 全ての答え合わせ
-            if (this.checkingAnswers(answerElm)) {
-                alert("Test");
-            } else {
+            var resultVal = this.timeInterval;
+            if (!this.checkingAnswers(colNo, answerElm)) {
                 // 正解表示と正解と違う箇所の背景色を変更させる
-                this.missLastAction(answerElm);
+                this.missLastAction(colNo, answerElm);
+                resultVal = 0;
             }
+
+            // 結果表示
+            this.resultAction(resultVal);
         } else {
-            // 正解と違う箇所をぷるぷるさせる
-            this.missAction(answerElm);
+            // 正解と違う箇所をシェイクさせる
+            this.missAction(colNo, answerElm);
         }
     };
 
@@ -64,14 +158,12 @@
         }
     };
 
-    // ゼロサプレス
-    StudyApp.prototype.zeroSuppress = function (val) {
-        return Number(val.replace(/\D/g, ''));
-    };
+    // 次の問題クリック処理
+    StudyApp.prototype.onNextClick = function (that, e) {
+        this.questionNo++;
+        this.timeInterval = StudyApp.TIMER_COUNT_MAX;
 
-    // ゼロパディング
-    StudyApp.prototype.zeroPadding = function (totalWidth, num) {
-        return ("00000" + num).slice(-totalWidth);
+        this.Update(0 /* Ready */);
     };
 
     // ワードボタン生成
@@ -88,15 +180,15 @@
     };
 
     // ワードリスト生成
-    StudyApp.prototype.setWordList = function () {
+    StudyApp.prototype.setWordList = function (colNo) {
         var _this = this;
         var wordlistElm = document.getElementById('wordlist');
         var input;
 
         wordlistElm.innerText = "";
         wordlistElm.className = "wordStyle";
-        for (var ans in this.obj["col001"].Answer) {
-            input = this.createWordBottun(ans, "wordOn", this.obj["col001"].Answer[ans]);
+        for (var ans in this.obj[colNo].Answer) {
+            input = this.createWordBottun(ans, "wordOn", this.obj[colNo].Answer[ans]);
             input.onclick = function (event) {
                 return _this.onWordClick(_this, event);
             };
@@ -105,7 +197,7 @@
     };
 
     // 答え合わせ処理
-    StudyApp.prototype.checkingAnswers = function (answerElm) {
+    StudyApp.prototype.checkingAnswers = function (colNo, answerElm) {
         var ans = "";
 
         for (var i = 0; i < answerElm.childElementCount; i++) {
@@ -113,8 +205,8 @@
             ans += elm.value + " ";
         }
         var str = "";
-        for (var i in this.obj["col001"].Answer) {
-            str += this.obj["col001"].Answer[i] + " ";
+        for (var i in this.obj[colNo].Answer) {
+            str += this.obj[colNo].Answer[i] + " ";
         }
         if (ans.trim() == str.trim()) {
             return true;
@@ -123,18 +215,18 @@
         return false;
     };
 
-    // 不正解時のぷるぷる処理
-    StudyApp.prototype.missAction = function (answerElm) {
+    // 不正解時のシェイク処理
+    StudyApp.prototype.missAction = function (colNo, answerElm) {
         for (var i = 0; i < answerElm.childElementCount; i++) {
             var elm = answerElm.childNodes[i];
-            if (elm.value != this.obj["col001"].Answer[i]) {
+            if (elm.value != this.obj[colNo].Answer[i]) {
                 elm.className = "answer rum";
             }
         }
     };
 
     // 不正解時の最終処理
-    StudyApp.prototype.missLastAction = function (answerElm) {
+    StudyApp.prototype.missLastAction = function (colNo, answerElm) {
         var wordelm = document.getElementById('check');
 
         var ptagElm = document.createElement('hr');
@@ -142,8 +234,8 @@
         var input;
 
         var i = 0;
-        for (var ans in this.obj["col001"].Answer) {
-            input = this.createWordBottun(ans, "answer", this.obj["col001"].Answer[ans]);
+        for (var ans in this.obj[colNo].Answer) {
+            input = this.createWordBottun(ans, "answer", this.obj[colNo].Answer[ans]);
             wordelm.appendChild(input);
 
             //違うところは色を変える
@@ -155,6 +247,37 @@
         }
     };
 
+    // 結果表示処理
+    StudyApp.prototype.resultAction = function (val) {
+        // タイマー解除
+        clearTimeout(this.timerToken);
+
+        var len = this.getJSONLength(this.resultList);
+        for (var i = 0; i < len; i++) {
+            var col = "rtn" + (i + 1);
+            if ((val / StudyApp.TIMER_COUNT_MAX) * 100 <= this.resultList[col].Range) {
+                var wordlistElm = document.getElementById('wordlist');
+                this.removeChildNode(wordlistElm);
+
+                // 残り秒数による結果表示
+                wordlistElm.className = "pulse";
+                wordlistElm.innerText = this.resultList[col].Message;
+
+                var scoreElm = document.getElementById('action');
+                scoreElm.className = "scoreStyle";
+                scoreElm.innerText = this.resultList[col].Score;
+
+                // ウェイト
+                this.waitInterval = 3;
+                this.waitAction(3 /* Next */);
+                break;
+            }
+        }
+    };
+
+    //----------------------------------------------------------
+    // タイマー関連処理
+    //----------------------------------------------------------
     // カウントダウンアクション
     StudyApp.prototype.startAction = function () {
         var _this = this;
@@ -165,11 +288,25 @@
             }, 1000);
         } else {
             clearTimeout(this.timerToken);
-            this.setWordList();
-            this.timerAction();
+            this.Update(1 /* Ready2 */);
             return;
         }
         document.getElementById("wordlist").innerText = this.countDown + "";
+    };
+
+    // ウェイトアクション
+    StudyApp.prototype.waitAction = function (nextState) {
+        var _this = this;
+        if (this.waitInterval > 0) {
+            this.waitInterval--;
+            this.timerToken = setTimeout(function () {
+                return _this.waitAction(nextState);
+            }, 500);
+        } else {
+            clearTimeout(this.timerToken);
+            this.Update(nextState);
+            return;
+        }
     };
 
     // タイマーアクション
@@ -182,9 +319,51 @@
             }, this.speed);
         } else {
             clearTimeout(this.timerToken);
+            return;
         }
         document.getElementById("timer").style.width = this.timeInterval + "px";
     };
+
+    // スリープ
+    StudyApp.prototype.sleep = function (ms) {
+        var d1 = new Date().getTime();
+        var d2 = new Date().getTime();
+        while (d2 < (d1 + ms)) {
+            d2 = new Date().getTime();
+        }
+        return;
+    };
+
+    //----------------------------------------------------------
+    // 共通関数
+    //----------------------------------------------------------
+    // ゼロサプレス
+    StudyApp.prototype.zeroSuppress = function (val) {
+        return Number(val.replace(/\D/g, ''));
+    };
+
+    // ゼロパディング
+    StudyApp.prototype.zeroPadding = function (totalWidth, num) {
+        return ("00000" + num).slice(-totalWidth);
+    };
+
+    // JSON件数
+    StudyApp.prototype.getJSONLength = function (target) {
+        var len = 0;
+        for (var m in target) {
+            len++;
+        }
+
+        return len;
+    };
+
+    // 子ノード全削除
+    StudyApp.prototype.removeChildNode = function (target) {
+        for (var i = target.childNodes.length - 1; i >= 0; i--) {
+            target.removeChild(target.childNodes[i]);
+        }
+    };
+    StudyApp.TIMER_COUNT_MAX = 240;
     return StudyApp;
 })();
 
