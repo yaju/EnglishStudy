@@ -15,7 +15,8 @@ enum Mode {
 }
 
 class StudyApp {
-    private static TIMER_COUNT_MAX:number = 240;
+    private static TIMER_COUNT_MAX: number = 240;
+    private static COUNT_DOWN_MAX: number = 3;      // カウントダウン数
 
     private element: HTMLElement;
 
@@ -28,13 +29,13 @@ class StudyApp {
 
     private timerToken: number;         // タイマートークン
     private waitInterval: number = 1;   // ウェイト数
-    private countDown:number = 3 + 1;   // カウントダウン数
+    private countDown: number;        
     private timeInterval: number = StudyApp.TIMER_COUNT_MAX;
 
     private obj: any =
     {
-        col001: { "Question": "これは教会です", "Answer": ["This", "is", "charch"], "Mark":"."},
-        col002: { "Question": "あれは机ですか", "Answer": ["Is", "that", "a", "desk"], "Mark": "?" },
+        col001: { "Question": "これは教会です", "Answer": ["This", "is", "charch"], "Dummy":["are"]},
+        col002: { "Question": "あれは机ですか", "Answer": ["Is", "that", "a", "desk", "?"], "Dummy": ["Are"]},
     };
 
     private resultList: any =
@@ -71,7 +72,7 @@ class StudyApp {
                     case Mode.Ready:
                         // 問題表示
                         questionElm.className = "firstStyle";
-                        questionElm.innerHTML += "<p>" + this.obj[colNo].Question + "</p>"
+                        questionElm.innerHTML = "<p>" + this.obj[colNo].Question + "</p>"
                         // 正答数(ダミーは除く)
                         this.answerCount = this.obj[colNo].Answer.length;
 
@@ -80,6 +81,8 @@ class StudyApp {
                         this.removeChildNode(actionElm);
 
                         // カウントダウン
+                        this.countDown = StudyApp.COUNT_DOWN_MAX + 1;
+                        wordlistElm.className = "countDown";
                         this.startAction();
                         break;
 
@@ -98,7 +101,9 @@ class StudyApp {
                         questionElm.className = "secondStyle";
                         questionElm.innerText = this.obj[colNo].Question;
                         break;
+
                     case Mode.Next:
+                        // 次の問題ボタン表示
                         wordlistElm.className = "resultSecond";
 
                         wordlistElm.innerText = "";
@@ -114,6 +119,18 @@ class StudyApp {
         }
 
         return true;
+    }
+
+    listener(e) {
+        switch (e.type) {
+            case "animationstart":
+                break;
+            case "animationend":
+
+                break;
+            case "animationiteration":
+                break;
+        }
     }
 
     // ワードクリック処理
@@ -135,10 +152,18 @@ class StudyApp {
         if (answerElm.childElementCount == this.answerCount) {
             // 全ての答え合わせ
             var resultVal: number = this.timeInterval;
-            if (!this.checkingAnswers(colNo, answerElm)) {
+            var ans = [];
+            if (!this.checkingAnswers(colNo, answerElm, ans)) {
                 // 正解表示と正解と違う箇所の背景色を変更させる
                 this.missLastAction(colNo, answerElm);
                 resultVal = 0;
+            }
+            else {
+                // 全て正解 
+ 	            // クリア
+                this.removeChildNode(answerElm);
+                answerElm.innerHTML = "<p>" + ans[0] + "</p>"
+
             }
             // 結果表示
             this.resultAction(resultVal);
@@ -193,19 +218,34 @@ class StudyApp {
     setWordList(colNo:string) {
         var wordlistElm: HTMLElement = document.getElementById('wordlist');
         var input: HTMLInputElement;
+        var strWord = [];
+        var r: number
+        var w: string;
+        var i: number;
+
+        for (var ans in this.obj[colNo].Answer) {
+            strWord.push(this.obj[colNo].Answer[ans]);
+        }
+
+        for (i = 0; i < strWord.length; i++) {
+            r = Math.floor(Math.random() * strWord.length);
+            w = strWord[i];
+            strWord[i] = strWord[r];
+            strWord[r] = w;
+        }
 
         wordlistElm.innerText = "";
         wordlistElm.className = "wordStyle";
-        for (var ans in this.obj[colNo].Answer) {
-            input = this.createWordBottun(ans, "wordOn", this.obj[colNo].Answer[ans]);
+        for (i = 0; i < strWord.length; i++) {
+            input = this.createWordBottun(i+1, "wordOn", strWord[i]);
             input.onclick = (event) => this.onWordClick(this, event);
             wordlistElm.appendChild(input);
         }
     }
 
     // 答え合わせ処理
-    checkingAnswers(colNo:string, answerElm: HTMLElement):boolean {
-        var ans: string = "";
+    checkingAnswers(colNo:string, answerElm: HTMLElement, result):boolean {
+        var ans:string = ""
 
         for (var i = 0; i < answerElm.childElementCount; i++) {
             var elm: HTMLInputElement = <HTMLInputElement>answerElm.childNodes[i];
@@ -215,7 +255,13 @@ class StudyApp {
         for (var i in this.obj[colNo].Answer) {
             str += this.obj[colNo].Answer[i] + " ";
         }
-        if (ans.trim() == str.trim()) {
+        ans = ans.trim();
+        if (ans == str.trim()) {
+            // ?がなければね、ピリオドを付ける
+            if (ans.indexOf("?") < 0) {
+                ans += ".";
+            }
+            result.push(ans);
             return true;
         }
         

@@ -111,22 +111,26 @@ input.miss {
 
 .pulse {
 	font-size:32px;
-    color : white;
     text-align: center;
-	animation: pulse 2s linear;
+    color : white;
+	animation: pulse 1s linear;
+    animation-fill-mode:forwards;
 	-webkit-animation: pulse 1s linear;
 }
 
 @keyframes pulse {
-     0% { transform: scale3d(1, 1, 1);  }
-    50% { transform: scale3d(1, 1, 1);  }
-   100% { transform: scale3d(0.5, 0.5, 0.5);  }
+  from {
+    font-size:32px;
+  }
+
+  to {
+    font-size:18px;
+  }
 }
 
 @-webkit-keyframes pulse {
-     0% { -webkit-transform: scale3d(1, 1, 1);  }
-    50% { -webkit-transform: scale3d(0.75, 0.75, 0.75);   }
-   100% { -webkit-transform: scale3d(0.5, 0.5, 0.5);  }
+     0% { font-size:32px;  }
+   100% { font-size:18px; text-align: left;  }
 }
 
 * {
